@@ -329,11 +329,194 @@ Explain:
 
 ## Step 17: Validation Checklist
 
-✔ Azure DevOps project created
-✔ Repository imported successfully
-✔ YAML pipeline created
-✔ Pipeline executed successfully
-✔ Logs inspected and understood
+✔ Azure DevOps project created  
+✔ Repository imported successfully  
+✔ YAML pipeline created  
+✔ Pipeline executed successfully  
+✔ Logs inspected and understood  
+
+---
+
+##  Detailed Step-by-Step Execution Guide (Facilitator-Friendly)
+
+This appendix expands each lab step into a **click-by-click guide** so participants can complete the lab without guessing.
+
+---
+
+### 1. Prerequisites – Validate Before Starting
+
+1. **Azure DevOps organization**
+   - Open a browser and go to `https://dev.azure.com`.
+   - Sign in with your **Microsoft account**.
+   - Verify that you see an **organization name** in the top-left (for example, `your-org-name`).
+   - If you do **not** have an organization, use the portal wizard to **create a new organization**.
+2. **Permissions**
+   - Make sure your account can **create projects and pipelines** in the organization.
+   - If you cannot create a project, contact an **Organization Administrator**.
+3. **GitHub access**
+   - Open `https://github.com/microsoft/azure-devops-node-sample` to confirm it is reachable.
+4. **Browser**
+   - Use a modern browser such as **Microsoft Edge** or **Google Chrome**.
+   - Incognito / InPrivate mode can help avoid cached authentication issues in shared environments.
+
+---
+
+### 2. Access Azure DevOps & Create the Project
+
+1. Go to `https://dev.azure.com` in your browser and sign in.
+2. At the top-left, confirm you are in the **correct organization** (switch if needed by using your profile menu).
+3. On the organization home page, click **New project**.
+4. Fill in:
+   - **Project name:** `ado-cicd-foundation`
+   - **Description:** optional, for example "CI/CD foundation lab".
+   - **Visibility:** **Private**
+   - **Work item process:** **Agile**
+   - **Version control:** **Git**
+5. Click **Create**.
+6. Wait to be redirected to the **project home** for `ado-cicd-foundation`.
+
+✅ **Validation:** Left navigation shows `Overview`, `Boards`, `Repos`, `Pipelines`, and `Artifacts` for this project.
+
+---
+
+### 3. Confirm Initial Project State
+
+1. In the left menu, click **Repos → Files**.
+2. Confirm that:
+   - The repo is **empty** (you should see an “Initialize” or “Import” option).
+3. In the left menu, click **Pipelines → Pipelines**.
+   - Confirm there are **no pipelines** yet.
+4. In the left menu, click **Artifacts**.
+   - Confirm there are **no feeds** or packages yet.
+
+This confirms you are starting from a **clean DevOps workspace** for the lab.
+
+---
+
+### 4. Import the Sample Git Repository
+
+1. Go to **Repos → Files**.
+2. If the repo is empty, click **Import** (or use the ⋮ menu → **Import repository**).
+3. In **Repository type**, leave the default **Git**.
+4. In **Clone URL**, paste:
+
+   ```
+   https://github.com/microsoft/azure-devops-node-sample
+   ```
+
+5. Click **Import** and wait for the operation to complete.
+6. When done, the file tree should populate with folders and files from the sample repo.
+7. Look at the **branch dropdown** at the top of the Repos view:
+   - Note whether the default branch is named **`main`** or **`master`** (you will need this for the YAML trigger).
+
+✅ **Validation:** You can open files like `package.json` and see valid content (Node.js app sample).
+
+---
+
+### 5. Create the First YAML Pipeline
+
+1. In the left menu, go to **Pipelines → Pipelines**.
+2. Click **Create Pipeline** (or **New pipeline** if one already exists).
+3. When asked “Where is your code?”, choose **Azure Repos Git**.
+4. Select the repository belonging to `ado-cicd-foundation` (the one you just imported into).
+5. On the “Configure your pipeline” screen, choose **Starter pipeline**.
+6. Azure DevOps opens the YAML editor with a **default starter pipeline**.
+
+You should see YAML similar to this:
+
+```yaml
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+```
+
+---
+
+### 6. Adjust the YAML Trigger (Branch Name)
+
+1. In another tab, go back to **Repos → Files** and verify the **default branch name**:
+   - If the branch dropdown shows **`main`**, you can keep `trigger: - main` in the YAML.
+   - If it shows **`master`**, change the YAML to:
+
+     ```yaml
+     trigger:
+     - master
+     ```
+
+2. Do **not** change `pool` or `steps` for this introductory lab unless instructed.
+
+✅ **Validation:** The YAML `trigger` branch matches the actual default branch in Repos.
+
+---
+
+### 7. Save and Run the Pipeline
+
+1. In the YAML editor, click **Save and run** (top right).
+2. In the dialog:
+   - Leave **“Commit directly to the \<branch\>”** selected (this will be `main` or `master`).
+   - Optionally, enter a commit message like `Add starter pipeline`.
+3. Click **Save and run** again.
+4. Azure DevOps will:
+   - Commit the YAML file to the repo.
+   - Create the pipeline definition.
+   - Start the **first run** of this pipeline automatically.
+
+You will be redirected to the run details page.
+
+---
+
+### 8. Observe the Pipeline Run and Logs
+
+1. On the run details page, watch the **job** (for example `Job`) move from **Queued** → **Running** → **Succeeded**.
+2. Click on the **job name** to see individual steps:
+   - `Initialize job`
+   - `Checkout`
+   - `Run a one-line script`
+   - `Finalize job`
+3. Click the **Run a one-line script** step.
+4. In the log output, confirm you see:
+
+   ```
+   echo Hello, world!
+   Hello, world!
+   ```
+
+✅ **Validation:** The job and all steps show **Succeeded**, and the script output includes `Hello, world!`.
+
+---
+
+### 9. Review Pipeline History and CI Flow
+
+1. Navigate to **Pipelines → Pipelines**.
+2. You should now see your pipeline listed with:
+   - A **green check** (Succeeded) for the latest run.
+   - The **branch** and **commit message** that triggered it.
+3. Click the pipeline name to open the **Runs** tab.
+4. Observe that:
+   - Each run is tied to a specific **commit**.
+   - Clicking a run shows the same logs you previously inspected.
+
+This demonstrates the basic **CI loop**: commit → pipeline → logs → status.
+
+---
+
+### 10. Common Issues & Quick Troubleshooting
+
+- **Pipeline never triggers on future commits**
+  - Confirm the YAML `trigger` branch matches the branch you are committing to (`main` vs `master`).
+  - Ensure the YAML file is in the **root** of the repo (default behavior for the starter pipeline).
+- **No permission to create project or pipeline**
+  - Ask an org admin to add you to the appropriate **security groups** (for example, Project Contributors) and allow pipeline creation.
+- **Import option not visible in Repos**
+  - There may already be content in the repo:
+    - Use the repo **⋮ menu → Import repository**, or
+    - Create a **new repository** in Project Settings and import into that.
 
 ---
 
